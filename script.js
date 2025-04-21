@@ -1,63 +1,41 @@
-const canvas = new fabric.Canvas("canvas", {
-  width: 600,
-  height: 600,
-  selection: false
-});
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const upload = document.getElementById('upload');
+const downloadBtn = document.getElementById('download');
+let panZoom;
+let img = new Image();
 
-const canvasContainer = document.getElementById("imageCanvas");
-const photoUpload = document.getElementById("photoUpload");
-
-let userImage;
-
-photoUpload.addEventListener("change", function (e) {
+upload.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
   const reader = new FileReader();
-  reader.onload = function (f) {
-    fabric.Image.fromURL(f.target.result, function (img) {
-      if (userImage) canvas.remove(userImage);
 
-      img.set({
-        left: 0,
-        top: 0,
-        scaleX: canvas.width / img.width,
-        scaleY: canvas.height / img.height,
-        hasBorders: false,
-        hasControls: true,
-        lockRotation: true,
-        cornerStyle: "circle",
-        cornerColor: "#e60012"
-      });
-
-      img.setControlsVisibility({
-        mt: false, mb: false, ml: false, mr: false, mtr: false
-      });
-
-      canvas.add(img);
-      canvas.sendToBack(img);
-      userImage = img;
-    });
+  reader.onload = function (event) {
+    img.src = event.target.result;
   };
-  reader.readAsDataURL(e.target.files[0]);
+
+  reader.readAsDataURL(file);
 });
 
-// Load frame as image on canvas
-fabric.Image.fromURL("assets/frame.png", function (frameImg) {
-  frameImg.set({
-    left: 0,
-    top: 0,
-    selectable: false
-  });
-  frameImg.scaleToWidth(canvas.width);
-  canvas.add(frameImg);
-  canvas.bringToFront(frameImg);
-});
+img.onload = () => {
+  canvas.width = 1080;
+  canvas.height = 1080;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-document.getElementById("downloadBtn").addEventListener("click", function () {
-  const dataURL = canvas.toDataURL({
-    format: "png"
+  if (panZoom) panZoom.dispose(); // Reset on new image
+  panZoom = panzoom(canvas, {
+    bounds: true,
+    boundsPadding: 0.1,
+    maxZoom: 3,
+    minZoom: 0.5
   });
+};
 
-  const link = document.createElement("a");
-  link.href = dataURL;
-  link.download = "framed-photo.png";
+downloadBtn.addEventListener('click', () => {
+  // Save canvas as image
+  const link = document.createElement('a');
+  link.download = 'framed-photo.png';
+  link.href = canvas.toDataURL();
   link.click();
 });
