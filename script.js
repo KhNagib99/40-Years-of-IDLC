@@ -1,51 +1,45 @@
-const photoInput = document.getElementById("photoInput");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const userPhotoInput = document.getElementById("userPhoto");
 const downloadBtn = document.getElementById("downloadBtn");
 
 let userImage = null;
 let frameImage = new Image();
-frameImage.src = "frames/frame1.png"; // Your default frame
+frameImage.src = "frames/frame.png"; // Static frame set by admin
 
 frameImage.onload = () => {
-  drawCanvas();
+  drawImages();
 };
 
-photoInput.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
+userPhotoInput.addEventListener("change", function () {
+  const file = this.files[0];
   const reader = new FileReader();
+
   reader.onload = function (event) {
     userImage = new Image();
-    userImage.onload = drawCanvas;
+    userImage.onload = drawImages;
     userImage.src = event.target.result;
   };
-  reader.readAsDataURL(file);
+
+  if (file) {
+    reader.readAsDataURL(file);
+  }
 });
 
-function drawCanvas() {
+function drawImages() {
+  // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
+
   if (userImage) {
-    const scale = Math.max(
-      canvas.width / userImage.width,
-      canvas.height / userImage.height
-    );
-    const x = (canvas.width / 2) - (userImage.width / 2) * scale;
-    const y = (canvas.height / 2) - (userImage.height / 2) * scale;
-
-    ctx.drawImage(userImage, x, y, userImage.width * scale, userImage.height * scale);
+    ctx.drawImage(userImage, 0, 0, canvas.width, canvas.height);
   }
 
-  if (frameImage.complete) {
-    ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
-  }
+  ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
 }
 
 downloadBtn.addEventListener("click", () => {
   const link = document.createElement("a");
   link.download = "framed-photo.png";
-  link.href = canvas.toDataURL();
+  link.href = canvas.toDataURL("image/png");
   link.click();
 });
