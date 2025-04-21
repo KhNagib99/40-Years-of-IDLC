@@ -3,23 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>IDLC | Frame Your Photo</title>
+  <title>Frame Your Photo</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <img src="assets/logo.png" alt="IDLC Logo" class="logo"/>
-  </header>
-  <main>
-    <h2>Frame Your Photo</h2>
-    <input type="file" id="photoUpload" accept="image/*" />
-    <div class="frame-container" id="frameContainer">
-      <img src="assets/frame.png" class="frame-overlay" />
-      <div id="imageCanvas"></div>
+  <div class="container">
+    <img src="assets/logo.png" alt="IDLC Logo" class="logo" />
+    <h1>Frame Your Photo</h1>
+
+    <input type="file" id="upload" accept="image/*" />
+    <div id="frame-area">
+      <div id="canvas-container">
+        <canvas id="canvas"></canvas>
+        <img src="assets/frame.png" id="frame" alt="Frame" />
+      </div>
     </div>
-    <button id="downloadBtn">Download Framed Photo</button>
-  </main>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+
+    <button id="download">Download Framed Photo</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/panzoom@9.4.0/dist/panzoom.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
