@@ -1,105 +1,141 @@
-const width = 500;
-const height = 500;
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-const stage = new Konva.Stage({
-  container: 'container',
-  width: width,
-  height: height,
-});
+const frameInput = document.getElementById("frameInput");
+const photoInput = document.getElementById("photoInput");
+const downloadBtn = document.getElementById("downloadBtn");
+const loading = document.getElementById("loading");
 
-const layer = new Konva.Layer();
-stage.add(layer);
+let frameImg = null;
+let photoImg = null;
+let photoPos = { x: 0, y: 0, scale: 1 };
+let dragging = false;
+let lastTouchDistance = null;
+let lastMousePos = null;
 
-// Add a neutral background (optional)
-const background = new Konva.Rect({
-  width: width,
-  height: height,
-  fill: '#f0f0f0',
-});
-layer.add(background);
+function drawCanvas() {
+  if (!frameImg || !photoImg) return;
 
-// Declare userPhoto globally so we can reuse/replace it
-let userPhoto;
+  loading.style.display = "none";
 
-// Handle photo upload
-document.getElementById('upload-photo').addEventListener('change', function (e) {
+  canvas.width = frameImg.width;
+  canvas.height = frameImg.height;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const w = photoImg.width * photoPos.scale;
+  const h = photoImg.height * photoPos.scale;
+  const x = photoPos.x;
+  const y = photoPos.y;
+
+  ctx.drawImage(photoImg, x, y, w, h);
+  ctx.drawImage(frameImg, 0, 0);
+}
+
+frameInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
   const reader = new FileReader();
-  reader.onload = function () {
-    const userImg = new Image();
-    userImg.src = reader.result;
-    userImg.onload = () => {
-      if (userPhoto) {
-        userPhoto.destroy(); // remove previous photo
-      }
-
-      // Calculate scale to fit image inside canvas
-      const scale = Math.min(width / userImg.width, height / userImg.height);
-      const imgWidth = userImg.width * scale;
-      const imgHeight = userImg.height * scale;
-      const offsetX = (width - imgWidth) / 2;
-      const offsetY = (height - imgHeight) / 2;
-
-      userPhoto = new Konva.Image({
-        image: userImg,
-        draggable: true,
-        x: offsetX,
-        y: offsetY,
-        width: imgWidth,
-        height: imgHeight,
-      });
-
-      // Allow zoom on scroll
-      userPhoto.on('wheel', (e) => {
-        e.evt.preventDefault();
-        const scaleBy = 1.05;
-        const oldScale = userPhoto.scaleX();
-        const pointer = stage.getPointerPosition();
-        const mousePointTo = {
-          x: (pointer.x - userPhoto.x()) / oldScale,
-          y: (pointer.y - userPhoto.y()) / oldScale,
-        };
-
-        const direction = e.evt.deltaY > 0 ? -1 : 1;
-        const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-
-        userPhoto.scale({ x: newScale, y: newScale });
-        userPhoto.position({
-          x: pointer.x - mousePointTo.x * newScale,
-          y: pointer.y - mousePointTo.y * newScale,
-        });
-
-        layer.batchDraw();
-      });
-
-      layer.add(userPhoto);
-      userPhoto.moveToBottom(); // move photo below frame (but above background)
-      background.moveToBottom(); // background stays lowest
-      layer.batchDraw();
+  reader.onload = () => {
+    frameImg = new Image();
+    frameImg.onload = () => {
+      if (photoImg) drawCanvas();
     };
+    frameImg.src = reader.result;
+    loading.style.display = "block";
   };
-  reader.readAsDataURL(e.target.files[0]);
+  reader.readAsDataURL(file);
 });
 
-// Add the frame on top (after background & photo)
-const frameImg = new Image();
-frameImg.src = 'frames/frame.png';
-frameImg.onload = () => {
-  const frame = new Konva.Image({
-    image: frameImg,
-    width: width,
-    height: height,
-    listening: false, // makes sure it doesn’t block user photo dragging
-  });
-  layer.add(frame);
-  frame.moveToTop();
-  layer.draw();
-};
+photoInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-// Download image
-document.getElementById('download-btn').addEventListener('click', function () {
-  const dataURL = stage.toDataURL({ pixelRatio: 2 });
-  const link = document.createElement('a');
-  link.download = 'framed-photo.png';
-  link.href = dataURL;
+  const reader = new FileReader();
+  reader.onload = () => {
+    photoImg = new Image();
+    photoImg.onload = () => {
+      photoPos = {
+        x: canvas.width / 4,
+        y: canvas.height / 4,
+        scale: 1
+      };
+      drawCanvas();
+    };
+    photoImg.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+canvas.addEventListener("mousedown", (e) => {
+  dragging = true;
+  lastMousePos = { x: e.offsetX, y: e.offsetY };
+});
+
+canvas.addEventListener("mousemove", (e) => {
+  if (!dragging) return;
+  const dx = e.offsetX - lastMousePos.x;
+  const dy = e.offsetY - lastMousePos.y;
+  photoPos.x += dx;
+  photoPos.y += dy;
+  lastMousePos = { x: e.offsetX, y: e.offsetY };
+  drawCanvas();
+});
+
+canvas.addEventListener("mouseup", () => dragging = false);
+canvas.addEventListener("mouseleave", () => dragging = false);
+
+// Mobile touch drag & pinch zoom
+canvas.addEventListener("touchstart", (e) => {
+  if (e.touches.length === 1) {
+    dragging = true;
+    lastMousePos = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY
+    };
+  } else if (e.touches.length === 2) {
+    lastTouchDistance = getDistance(e.touches);
+  }
+});
+
+canvas.addEventListener("touchmove", (e) => {
+  e.preventDefault();
+  if (e.touches.length === 1 && dragging) {
+    const dx = e.touches[0].clientX - lastMousePos.x;
+    const dy = e.touches[0].clientY - lastMousePos.y;
+    photoPos.x += dx;
+    photoPos.y += dy;
+    lastMousePos = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY
+    };
+    drawCanvas();
+  } else if (e.touches.length === 2) {
+    const newDist = getDistance(e.touches);
+    if (lastTouchDistance) {
+      const delta = newDist / lastTouchDistance;
+      photoPos.scale *= delta;
+      drawCanvas();
+    }
+    lastTouchDistance = newDist;
+  }
+}, { passive: false });
+
+canvas.addEventListener("touchend", () => {
+  dragging = false;
+  lastTouchDistance = null;
+});
+
+function getDistance(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+downloadBtn.addEventListener("click", () => {
+  const link = document.createElement("a");
+  link.download = "framed-photo.png";
+  link.href = canvas.toDataURL();
   link.click();
 });
