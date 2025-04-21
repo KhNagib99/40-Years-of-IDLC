@@ -3,29 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IDLC Photo Frame</title>
+  <title>IDLC Frame Your Photo</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <img src="Logo_IDLC Group Horizontal.png" alt="IDLC Logo" class="logo" />
+    <img src="assets/logo.png" alt="IDLC Logo" class="logo" />
   </header>
 
-  <main>
-    <div class="container">
-      <h1>Frame Your Photo</h1>
+  <main class="container">
+    <h1>Frame Your Photo</h1>
 
-      <div class="upload-section">
-        <label for="photoInput">Upload Your Photo:</label>
-        <input type="file" id="photoInput" accept="image/*" />
-      </div>
+    <label for="userPhoto">Upload Your Photo:</label>
+    <input type="file" id="userPhoto" accept="image/*" />
 
-      <div id="canvasWrapper">
-        <canvas id="canvas" width="400" height="400"></canvas>
-      </div>
-
-      <button id="downloadBtn">Download Framed Photo</button>
+    <div class="canvas-container">
+      <canvas id="canvas" width="400" height="400"></canvas>
     </div>
+
+    <button id="downloadBtn">Download Framed Photo</button>
   </main>
 
   <script src="script.js"></script>
