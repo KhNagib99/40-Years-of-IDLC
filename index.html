@@ -2,28 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IDLC Frame Your Photo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IDLC | Frame Your Photo</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <img src="assets/logo.png" alt="IDLC Logo" class="logo" />
+    <img src="assets/logo.png" alt="IDLC Logo" class="logo"/>
   </header>
-
-  <main class="container">
-    <h1>Frame Your Photo</h1>
-
-    <label for="userPhoto">Upload Your Photo:</label>
-    <input type="file" id="userPhoto" accept="image/*" />
-
-    <div class="canvas-container">
-      <canvas id="canvas" width="400" height="400"></canvas>
+  <main>
+    <h2>Frame Your Photo</h2>
+    <input type="file" id="photoUpload" accept="image/*" />
+    <div class="frame-container" id="frameContainer">
+      <img src="assets/frame.png" class="frame-overlay" />
+      <div id="imageCanvas"></div>
     </div>
-
     <button id="downloadBtn">Download Framed Photo</button>
   </main>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
