@@ -1,45 +1,63 @@
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-const userPhotoInput = document.getElementById("userPhoto");
-const downloadBtn = document.getElementById("downloadBtn");
-
-let userImage = null;
-let frameImage = new Image();
-frameImage.src = "frames/frame.png"; // Static frame set by admin
-
-frameImage.onload = () => {
-  drawImages();
-};
-
-userPhotoInput.addEventListener("change", function () {
-  const file = this.files[0];
-  const reader = new FileReader();
-
-  reader.onload = function (event) {
-    userImage = new Image();
-    userImage.onload = drawImages;
-    userImage.src = event.target.result;
-  };
-
-  if (file) {
-    reader.readAsDataURL(file);
-  }
+const canvas = new fabric.Canvas("canvas", {
+  width: 600,
+  height: 600,
+  selection: false
 });
 
-function drawImages() {
-  // Clear canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+const canvasContainer = document.getElementById("imageCanvas");
+const photoUpload = document.getElementById("photoUpload");
 
-  if (userImage) {
-    ctx.drawImage(userImage, 0, 0, canvas.width, canvas.height);
-  }
+let userImage;
 
-  ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
-}
+photoUpload.addEventListener("change", function (e) {
+  const reader = new FileReader();
+  reader.onload = function (f) {
+    fabric.Image.fromURL(f.target.result, function (img) {
+      if (userImage) canvas.remove(userImage);
 
-downloadBtn.addEventListener("click", () => {
+      img.set({
+        left: 0,
+        top: 0,
+        scaleX: canvas.width / img.width,
+        scaleY: canvas.height / img.height,
+        hasBorders: false,
+        hasControls: true,
+        lockRotation: true,
+        cornerStyle: "circle",
+        cornerColor: "#e60012"
+      });
+
+      img.setControlsVisibility({
+        mt: false, mb: false, ml: false, mr: false, mtr: false
+      });
+
+      canvas.add(img);
+      canvas.sendToBack(img);
+      userImage = img;
+    });
+  };
+  reader.readAsDataURL(e.target.files[0]);
+});
+
+// Load frame as image on canvas
+fabric.Image.fromURL("assets/frame.png", function (frameImg) {
+  frameImg.set({
+    left: 0,
+    top: 0,
+    selectable: false
+  });
+  frameImg.scaleToWidth(canvas.width);
+  canvas.add(frameImg);
+  canvas.bringToFront(frameImg);
+});
+
+document.getElementById("downloadBtn").addEventListener("click", function () {
+  const dataURL = canvas.toDataURL({
+    format: "png"
+  });
+
   const link = document.createElement("a");
+  link.href = dataURL;
   link.download = "framed-photo.png";
-  link.href = canvas.toDataURL("image/png");
   link.click();
 });
