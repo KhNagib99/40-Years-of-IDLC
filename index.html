@@ -2,35 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Frame Your Photo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IDLC Photo Frame</title>
   <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <header>
-    <img src="assets/logo.png" alt="IDLC Logo" class="logo" />
+    <img src="Logo_IDLC Group Horizontal.png" alt="IDLC Logo" class="logo" />
   </header>
 
   <main>
-    <h1>Frame Your Photo</h1>
+    <div class="container">
+      <h1>Frame Your Photo</h1>
 
-    <div class="upload-section">
-      <label>Upload Frame:</label>
-      <input type="file" id="frameInput" accept="image/*" />
+      <div class="upload-section">
+        <label for="photoInput">Upload Your Photo:</label>
+        <input type="file" id="photoInput" accept="image/*" />
+      </div>
+
+      <div id="canvasWrapper">
+        <canvas id="canvas" width="400" height="400"></canvas>
+      </div>
+
+      <button id="downloadBtn">Download Framed Photo</button>
     </div>
-
-    <div class="upload-section">
-      <label>Upload Your Photo:</label>
-      <input type="file" id="photoInput" accept="image/*" />
-    </div>
-
-    <div id="canvasContainer">
-      <canvas id="canvas"></canvas>
-      <div id="loading">Loading...</div>
-    </div>
-
-    <button id="downloadBtn">Download Framed Photo</button>
   </main>
 
   <script src="script.js"></script>
